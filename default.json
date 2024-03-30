@@ -1,9 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
-    "schedule:earlySaturdays"
+    "config:recommended"
   ],
+  "schedule": ["every saturday"],
   "lockFileMaintenance": { "enabled": true },
   "dependencyDashboard": false,
   "automerge": true
