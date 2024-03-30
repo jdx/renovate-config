@@ -4,6 +4,7 @@
     "config:recommended",
     "schedule:earlySaturdays"
   ],
+  "lockFileMaintenance": { "enabled": true },
   "dependencyDashboard": false,
   "automerge": true
 }
