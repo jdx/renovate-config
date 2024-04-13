@@ -3,7 +3,8 @@
   "automerge": true,
   "dependencyDashboard": false,
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "schedule:daily"
   ],
   "lockFileMaintenance": {
     "enabled": true
