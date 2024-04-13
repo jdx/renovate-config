@@ -3,11 +3,10 @@
   "automerge": true,
   "dependencyDashboard": false,
   "extends": [
-    "config:best-practices"
+    "config:recommended"
   ],
   "lockFileMaintenance": {
     "enabled": true
   },
-  "pinDigests": false,
   "timezone": "America/Chicago"
 }
