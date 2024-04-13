@@ -7,5 +7,6 @@
   "timezone": "America/Chicago",
   "lockFileMaintenance": { "enabled": true },
   "dependencyDashboard": false,
+  "pinDigests": false,
   "automerge": true
 }
