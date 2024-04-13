@@ -1,11 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "automerge": true,
+  "dependencyDashboard": false,
   "extends": [
     "config:best-practices"
   ],
-  "timezone": "America/Chicago",
-  "lockFileMaintenance": { "enabled": true },
-  "dependencyDashboard": false,
+  "lockFileMaintenance": {
+    "enabled": true
+  },
   "pinDigests": false,
-  "automerge": true
+  "timezone": "America/Chicago"
 }
