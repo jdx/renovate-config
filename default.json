@@ -7,7 +7,7 @@
     "schedule:earlyMondays"
   ],
   "lockFileMaintenance": {
-    "enabled": true
+    "enabled": false
   },
   "timezone": "America/Chicago"
 }
