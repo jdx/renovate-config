@@ -3,11 +3,13 @@
   "automerge": false,
   "dependencyDashboard": false,
   "extends": [
-    "config:recommended",
-    "schedule:earlyFridays"
+    "config:recommended"
   ],
   "lockFileMaintenance": {
     "enabled": false
   },
-  "timezone": "America/Chicago"
+  "timezone": "America/Chicago",
+  "schedule": [
+    "before 4am on Friday"
+  ]
 }
