@@ -3,7 +3,8 @@
   "automerge": false,
   "dependencyDashboard": false,
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"]
   ],
   "lockFileMaintenance": {
     "enabled": false
