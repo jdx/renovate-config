@@ -4,7 +4,7 @@
   "dependencyDashboard": false,
   "extends": [
     "config:recommended",
-    "helpers:pinGitHubActionDigests"]
+    "helpers:pinGitHubActionDigests"
   ],
   "lockFileMaintenance": {
     "enabled": false
