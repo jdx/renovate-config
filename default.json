@@ -16,9 +16,7 @@
   "packageRules": [
     {
       "matchPackageNames": ["taiki-e/install-action"],
-      "pin": {
-        "enabled": false
-      }
+      "pinDigests": false
     }
   ]
 }
