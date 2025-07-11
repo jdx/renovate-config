@@ -12,5 +12,13 @@
   "timezone": "America/Chicago",
   "schedule": [
     "before 4am on Friday"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["taiki-e/install-action"],
+      "pin": {
+        "enabled": false
+      }
+    }
   ]
 }
