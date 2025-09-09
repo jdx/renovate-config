@@ -3,7 +3,11 @@
   "automerge": true,
   "dependencyDashboard": true,
   "extends": [
-    "config:best-practices"
+    "config:recommended",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests",
+    ":configMigration",
+    "abandonments:recommended"
   ],
   "lockFileMaintenance": {
     "enabled": false
