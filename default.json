@@ -1,19 +1,23 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "automerge": false,
-  "dependencyDashboard": false,
+  "automerge": true,
+  "dependencyDashboard": true,
   "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigests"
+    "config:best-practices"
   ],
   "lockFileMaintenance": {
     "enabled": false
   },
   "timezone": "America/Chicago",
   "schedule": [
-    "before 4am on Friday"
+    "at any time"
   ],
   "packageRules": [
+    {
+      "description": "Automerge non-major updates",
+      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
+      "automerge": true
+    },
     {
       "matchPackageNames": ["taiki-e/install-action"],
       "pinDigests": false
