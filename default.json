@@ -10,11 +10,11 @@
     "abandonments:recommended"
   ],
   "lockFileMaintenance": {
-    "enabled": false
+    "enabled": true
   },
   "timezone": "America/Chicago",
   "schedule": [
-    "at any time"
+    "before 4am on friday"
   ],
   "packageRules": [
     {
@@ -25,6 +25,11 @@
     {
       "matchPackageNames": ["taiki-e/install-action"],
       "pinDigests": false
+    },
+    {
+      "description": "Group lockfile maintenance updates",
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "groupName": "lockfile maintenance"
     }
   ]
 }
