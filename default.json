@@ -15,7 +15,7 @@
   },
   "timezone": "America/Chicago",
   "schedule": [
-    "at any time on friday"
+    "* * * * 5"
   ],
   "packageRules": [
     {
