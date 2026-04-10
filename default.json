@@ -13,6 +13,7 @@
   "lockFileMaintenance": {
     "enabled": true
   },
+  "prHourlyLimit": 10,
   "timezone": "America/Chicago",
   "schedule": [
     "* * * * 5"
