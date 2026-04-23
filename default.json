@@ -14,6 +14,7 @@
     "enabled": true
   },
   "prHourlyLimit": 10,
+  "minimumReleaseAge": "7 days",
   "timezone": "America/Chicago",
   "schedule": [
     "* * * * 5"
