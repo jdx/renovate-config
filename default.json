@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "cloneSubmodules": true,
   "automerge": true,
+  "cloneSubmodules": true,
   "dependencyDashboard": true,
   "extends": [
     "config:recommended",
@@ -14,26 +14,129 @@
     "enabled": true,
     "minimumReleaseAge": "7 days"
   },
-  "prHourlyLimit": 10,
   "minimumReleaseAge": "7 days",
-  "timezone": "America/Chicago",
-  "schedule": [
-    "* * * * 5"
-  ],
   "packageRules": [
     {
+      "automerge": true,
       "description": "Automerge non-major updates",
-      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
-      "automerge": true
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "lockFileMaintenance"
+      ]
     },
     {
-      "matchPackageNames": ["taiki-e/install-action"],
+      "description": "Do not delay jdx-owned crates",
+      "matchDatasources": [
+        "crate"
+      ],
+      "matchPackageNames": [
+        "aqua-registry",
+        "aube",
+        "aube-codes",
+        "aube-linker",
+        "aube-lockfile",
+        "aube-manifest",
+        "aube-registry",
+        "aube-resolver",
+        "aube-runtime",
+        "aube-scripts",
+        "aube-settings",
+        "aube-store",
+        "aube-util",
+        "aube-workspace",
+        "clap-sort",
+        "clap_usage",
+        "clonedir",
+        "clonedir_lib",
+        "clx",
+        "communique",
+        "deepmerge",
+        "deepmerge-derive",
+        "demand",
+        "ensembler",
+        "entrepot",
+        "expr-lang",
+        "fnox",
+        "fnox-core",
+        "garni",
+        "hk",
+        "jdx-csv-lint",
+        "mise",
+        "mise-interactive-config",
+        "mise-sigstore",
+        "nd",
+        "nd_lib",
+        "osv-bloom",
+        "osv-bloom-build",
+        "pitchfork-cli",
+        "pklr",
+        "quick-bool",
+        "rpkl-jdx",
+        "rtx-cli",
+        "sigstore-verification",
+        "spinners-jdxcode",
+        "usage-cli",
+        "usage-lib",
+        "usage_example_rust_clap",
+        "vfox",
+        "wait-for-gh-rate-limit",
+        "xx"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Do not delay jdx-owned CLI tool releases",
+      "matchPackageNames": [
+        "aqua:jdx/aube",
+        "aqua:jdx/hk",
+        "aqua:jdx/pitchfork",
+        "aqua:jdx/usage",
+        "aube",
+        "cargo:aube",
+        "communique",
+        "fnox",
+        "ghcr.io/jdx/mise",
+        "github:jdx/aube",
+        "github:jdx/communique",
+        "github:jdx/fnox",
+        "github:jdx/wait-for-gh-rate-limit",
+        "hk",
+        "jdx/aube",
+        "jdx/communique",
+        "jdx/fnox",
+        "jdx/hk",
+        "jdx/mise",
+        "jdx/pitchfork",
+        "jdx/ubi",
+        "jdx/usage",
+        "jdx/wait-for-gh-rate-limit",
+        "mise",
+        "pitchfork",
+        "ubi",
+        "usage",
+        "wait-for-gh-rate-limit"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
+      "matchPackageNames": [
+        "taiki-e/install-action"
+      ],
       "pinDigests": false
     },
     {
       "description": "Group lockfile maintenance updates",
-      "matchUpdateTypes": ["lockFileMaintenance"],
-      "groupName": "lockfile maintenance"
+      "groupName": "lockfile maintenance",
+      "matchUpdateTypes": [
+        "lockFileMaintenance"
+      ]
     }
-  ]
+  ],
+  "prHourlyLimit": 10,
+  "schedule": [
+    "* * * * 5"
+  ],
+  "timezone": "America/Chicago"
 }
