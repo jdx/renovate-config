@@ -127,6 +127,33 @@
       "pinDigests": false
     },
     {
+      "description": "Regenerate mise lockfiles for npm-backed mise tools with Node/npm available",
+      "matchManagers": [
+        "mise"
+      ],
+      "matchDatasources": [
+        "npm"
+      ],
+      "postUpgradeTasks": {
+        "commands": [
+          "mise lock"
+        ],
+        "executionMode": "branch",
+        "fileFilters": [
+          "mise.lock",
+          "mise.*.lock",
+          "**/mise.lock",
+          "**/mise.*.lock"
+        ],
+        "installTools": {
+          "mise": {},
+          "node": {},
+          "npm": {}
+        },
+        "workingDirTemplate": "{{{packageFileDir}}}"
+      }
+    },
+    {
       "description": "Group lockfile maintenance updates",
       "groupName": "lockfile maintenance",
       "matchUpdateTypes": [
