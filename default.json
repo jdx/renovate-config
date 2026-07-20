@@ -160,7 +160,7 @@
       ],
       "postUpgradeTasks": {
         "commands": [
-          "test -f aube-lock.yaml && mise x -- aube install --no-frozen-lockfile || true"
+          "if [ -f aube-lock.yaml ]; then mise x -- aube install --no-frozen-lockfile; fi"
         ],
         "executionMode": "branch",
         "fileFilters": [
