@@ -57,13 +57,14 @@ jobs:
       group: aube-lock-${{ github.ref }}
       cancel-in-progress: true
     env:
-      # secrets context is not allowed in step-level `if`; the app id is
-      # not sensitive, so surface it via env for the presence check
-      AUBE_LOCK_APP_ID: ${{ secrets.AUBE_LOCK_APP_ID }}
+      # secrets context is not allowed in step-level `if`; surface the
+      # presence check via env. Both secrets must be set, otherwise fall
+      # back to GITHUB_TOKEN instead of failing the token step
+      AUBE_LOCK_HAS_APP: ${{ secrets.AUBE_LOCK_APP_ID != '' && secrets.AUBE_LOCK_APP_PRIVATE_KEY != '' }}
     steps:
       - name: Generate app token
         id: app-token
-        if: env.AUBE_LOCK_APP_ID != ''
+        if: env.AUBE_LOCK_HAS_APP == 'true'
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           app-id: ${{ secrets.AUBE_LOCK_APP_ID }}
@@ -73,25 +74,31 @@ jobs:
         with:
           persist-credentials: false
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
-      - name: Regenerate aube-lock.yaml
+      - name: Regenerate aube lockfiles
+        # regenerate every tracked aube-lock.yaml, not just the root one:
+        # repos like jdx/hk keep a nested docs/aube-lock.yaml alongside the
+        # root lockfile. the git pathspec '*aube-lock.yaml' matches both.
         run: |
-          if [ ! -f aube-lock.yaml ]; then
+          if [ -z "$(git ls-files -- '*aube-lock.yaml')" ]; then
             echo "no aube-lock.yaml in this repo, nothing to do"
             exit 0
           fi
-          mise x -- aube install --no-frozen-lockfile
+          for d in $(git ls-files -- '*aube-lock.yaml' | xargs -n1 dirname); do
+            echo "regenerating aube-lock.yaml in $d"
+            (cd "$d" && mise x -- aube install --no-frozen-lockfile) || exit 1
+          done
       - name: Commit and push if changed
         env:
           PUSH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           REPO: ${{ github.repository }}
           BRANCH: ${{ github.ref_name }}
         run: |
-          if ! [ -f aube-lock.yaml ] || git diff --quiet -- aube-lock.yaml; then
-            echo "aube-lock.yaml already up to date"
+          if git diff --quiet -- '*aube-lock.yaml'; then
+            echo "aube lockfiles already up to date"
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add aube-lock.yaml
+          git add -- '*aube-lock.yaml'
           git commit -m 'chore(deps): regenerate aube-lock.yaml'
           git push "https://x-access-token:${PUSH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH}"
