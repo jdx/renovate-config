@@ -157,25 +157,6 @@
       }
     },
     {
-      "description": "Regenerate aube-lock.yaml when npm dependencies change (aube projects only)",
-      "matchManagers": [
-        "npm"
-      ],
-      "postUpgradeTasks": {
-        "commands": [
-          "git ls-files -- '*aube-lock.yaml' | while read -r f; do (cd \"$(dirname \"$f\")\" && mise x -- aube install --no-frozen-lockfile) || exit 1; done"
-        ],
-        "executionMode": "branch",
-        "fileFilters": [
-          "aube-lock.yaml",
-          "**/aube-lock.yaml"
-        ],
-        "installTools": {
-          "mise": {}
-        }
-      }
-    },
-    {
       "description": "Group lockfile maintenance updates",
       "groupName": "lockfile maintenance",
       "matchUpdateTypes": [
