@@ -10,6 +10,9 @@
     ":configMigration",
     "abandonments:recommended"
   ],
+  "gitIgnoredAuthors": [
+    "41898282+github-actions[bot]@users.noreply.github.com"
+  ],
   "lockFileMaintenance": {
     "enabled": true,
     "minimumReleaseAge": "7 days"

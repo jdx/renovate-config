@@ -1,0 +1,78 @@
+name: aube-lock
+
+# Reusable workflow: regenerates aube-lock.yaml on Renovate branches.
+#
+# Renovate has no native aube manager, so its npm manager updates
+# package.json but leaves aube-lock.yaml stale, breaking CI runs of
+# `aube install --frozen-lockfile`. postUpgradeTasks would fix this but
+# only run on self-hosted Renovate, not the Mend hosted app. This
+# workflow closes the gap: it runs on pushes to renovate/** branches,
+# regenerates the lockfile, and commits it back.
+#
+# Caller repos add (with `permissions: contents: write`):
+#
+#   name: aube-lock
+#   on:
+#     push:
+#       branches: ["renovate/**"]
+#   permissions:
+#     contents: write
+#   jobs:
+#     aube-lock:
+#       uses: jdx/renovate-config/.github/workflows/aube-lock.yml@main
+#       secrets: inherit
+#
+# Secrets (optional but recommended): AUBE_LOCK_APP_ID and
+# AUBE_LOCK_APP_PRIVATE_KEY for a GitHub App with contents:write. When
+# present, the lockfile commit is pushed with a short-lived App token so
+# it retriggers CI on the Renovate branch. Without them the workflow
+# falls back to GITHUB_TOKEN, which still fixes the lockfile but does
+# NOT retrigger workflows (GitHub's recursion guard), so the PR's checks
+# must be re-run manually.
+#
+# The committer author must be listed in gitIgnoredAuthors in the shared
+# Renovate config (see default.json) so Renovate keeps rebasing branches
+# we have committed to.
+
+on:
+  workflow_call: {}
+
+jobs:
+  aube-lock:
+    # Only react to Renovate's own pushes; our fix-up push (App token)
+    # has a different actor, so this also prevents self-retriggering.
+    if: github.actor == 'renovate[bot]'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: aube-lock-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Generate app token
+        id: app-token
+        if: ${{ secrets.AUBE_LOCK_APP_ID != '' }}
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.AUBE_LOCK_APP_ID }}
+          private-key: ${{ secrets.AUBE_LOCK_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token || github.token }}
+      - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+      - name: Regenerate aube-lock.yaml
+        run: |
+          if [ ! -f aube-lock.yaml ]; then
+            echo "no aube-lock.yaml in this repo, nothing to do"
+            exit 0
+          fi
+          mise x -- aube install --no-frozen-lockfile
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- aube-lock.yaml; then
+            echo "aube-lock.yaml already up to date"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add aube-lock.yaml
+          git commit -m 'chore(deps): regenerate aube-lock.yaml'
+          git push
