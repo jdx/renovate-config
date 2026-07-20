@@ -163,7 +163,7 @@
       ],
       "postUpgradeTasks": {
         "commands": [
-          "for d in $(git ls-files -- '*aube-lock.yaml' | xargs -n1 dirname); do (cd \"$d\" && mise x -- aube install --no-frozen-lockfile) || exit 1; done"
+          "git ls-files -- '*aube-lock.yaml' | while read -r f; do (cd \"$(dirname \"$f\")\" && mise x -- aube install --no-frozen-lockfile) || exit 1; done"
         ],
         "executionMode": "branch",
         "fileFilters": [
