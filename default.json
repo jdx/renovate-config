@@ -166,7 +166,7 @@
   ],
   "prHourlyLimit": 10,
   "schedule": [
-    "* * * * 5"
+    "* * * * 2"
   ],
   "timezone": "America/Chicago"
 }
