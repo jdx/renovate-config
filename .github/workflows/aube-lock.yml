@@ -20,9 +20,16 @@ name: aube-lock
 #   jobs:
 #     aube-lock:
 #       uses: jdx/renovate-config/.github/workflows/aube-lock.yml@<sha>
+#       with:
+#         post_update_task: renovate:post-update
 #       secrets:
 #         AUBE_LOCK_APP_ID: ${{ secrets.AUBE_LOCK_APP_ID }}
 #         AUBE_LOCK_APP_PRIVATE_KEY: ${{ secrets.AUBE_LOCK_APP_PRIVATE_KEY }}
+#
+# Callers can define a mise task for generated files that depend on the
+# resolved package versions and pass its name as post_update_task. The
+# workflow runs it after refreshing aube-lock.yaml and commits any tracked
+# files it changes alongside the lockfile.
 #
 # Secrets (optional but recommended): AUBE_LOCK_APP_ID and
 # AUBE_LOCK_APP_PRIVATE_KEY for a GitHub App with contents:write. When
@@ -38,6 +45,12 @@ name: aube-lock
 
 on:
   workflow_call:
+    inputs:
+      post_update_task:
+        description: Optional mise task that regenerates dependency-derived files
+        required: false
+        type: string
+        default: ""
     secrets:
       AUBE_LOCK_APP_ID:
         description: GitHub App ID used to push lockfile commits (optional)
@@ -87,18 +100,23 @@ jobs:
             echo "regenerating aube-lock.yaml in $d"
             (cd "$d" && mise x -- aube install --no-frozen-lockfile) || exit 1
           done
+      - name: Regenerate dependency-derived files
+        if: inputs.post_update_task != ''
+        env:
+          POST_UPDATE_TASK: ${{ inputs.post_update_task }}
+        run: mise run "$POST_UPDATE_TASK"
       - name: Commit and push if changed
         env:
           PUSH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           REPO: ${{ github.repository }}
           BRANCH: ${{ github.ref_name }}
         run: |
-          if git diff --quiet -- '*aube-lock.yaml'; then
-            echo "aube lockfiles already up to date"
+          if git diff --quiet; then
+            echo "dependency artifacts already up to date"
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- '*aube-lock.yaml'
-          git commit -m 'chore(deps): regenerate aube-lock.yaml'
+          git add -u
+          git commit -m 'chore(deps): regenerate dependency artifacts'
           git push "https://x-access-token:${PUSH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH}"
