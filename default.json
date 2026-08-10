@@ -36,6 +36,7 @@
       ],
       "matchPackageNames": [
         "aqua-registry",
+        "asset-picker",
         "aube",
         "aube-codes",
         "aube-linker",
@@ -49,6 +50,8 @@
         "aube-store",
         "aube-util",
         "aube-workspace",
+        "cible",
+        "cible-core",
         "clap-sort",
         "clap_usage",
         "clonedir",
@@ -63,10 +66,13 @@
         "expr-lang",
         "fnox",
         "fnox-core",
+        "gabarit",
         "garni",
         "hk",
         "jdx-csv-lint",
+        "jdx-tar",
         "mise",
+        "mise-cache",
         "mise-interactive-config",
         "mise-sigstore",
         "nd",
@@ -80,6 +86,7 @@
         "rtx-cli",
         "sigstore-verification",
         "spinners-jdxcode",
+        "tak-cli",
         "usage-cli",
         "usage-lib",
         "usage_example_rust_clap",
@@ -87,7 +94,10 @@
         "wait-for-gh-rate-limit",
         "xx"
       ],
-      "minimumReleaseAge": null
+      "minimumReleaseAge": null,
+      "schedule": [
+        "at any time"
+      ]
     },
     {
       "description": "Do not delay jdx-owned CLI tool releases",
