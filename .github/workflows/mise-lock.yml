@@ -107,6 +107,13 @@ jobs:
           # `mise lock` resolves releases through the GitHub API; without a
           # token it is rate limited per runner IP.
           GITHUB_TOKEN: ${{ github.token }}
+          # `mise lock` otherwise loads project config normally, which can
+          # execute code (templated env, for instance). Safe mode is a hard
+          # boundary against that: the config is inert, so it can neither run
+          # code nor inject environment. Renovate's own mise manager relies on
+          # this for the same command. Requires mise >= 2026.7.12, which
+          # mise-action installs by default.
+          MISE_SAFE: "1"
         # regenerate every tracked lockfile, not just the root one: a repo
         # may keep a nested mise.lock beside a subdirectory's mise.toml, and
         # MISE_ENV configs lock to mise.<env>.lock.
