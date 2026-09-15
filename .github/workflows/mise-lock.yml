@@ -192,7 +192,12 @@ jobs:
           POST_UPDATE_PATHS: ${{ inputs.post_update_paths }}
         run: |
           set -euo pipefail
-          git add -- '*mise.lock' '*mise.*.lock'
+          # Staged through ls-files rather than `git add -- <glob>`: git treats
+          # an unmatched pathspec as fatal, so a repo tracking only mise.lock
+          # would die on the mise.*.lock glob and never push the fix. `-r`
+          # keeps git add from running argument-less when nothing matches, and
+          # -z/-0 preserves paths containing whitespace.
+          git ls-files -z -- '*mise.lock' '*mise.*.lock' | xargs -0 -r git add --
           while IFS= read -r path; do
             if [ -n "$path" ]; then
               git add -- "$path"
