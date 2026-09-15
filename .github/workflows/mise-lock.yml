@@ -114,22 +114,65 @@ jobs:
           # this for the same command. Requires mise >= 2026.7.12, which
           # mise-action installs by default.
           MISE_SAFE: "1"
-        # regenerate every tracked lockfile, not just the root one: a repo
-        # may keep a nested mise.lock beside a subdirectory's mise.toml, and
-        # MISE_ENV configs lock to mise.<env>.lock.
+        # Regenerate every tracked lockfile, not just the root one: a repo may
+        # keep a nested mise.lock beside a subdirectory's mise.toml, and may
+        # track several in one directory.
+        #
+        # Each lockfile selects which config `mise lock` writes, so the name
+        # has to be decoded rather than reduced to its directory (mise's
+        # lockfile_path_for_config):
+        #
+        #   mise.lock              default
+        #   mise.local.lock        --local
+        #   mise.<env>.lock        MISE_ENV=<env>
+        #   mise.<env>.local.lock  MISE_ENV=<env> --local
+        #
+        # NUL-delimited so paths containing whitespace survive the loop.
         run: |
           set -euo pipefail
-          lockfiles="$(git ls-files -- '*mise.lock' '*mise.*.lock')"
-          if [ -z "$lockfiles" ]; then
+          found=false
+          while IFS= read -r -d '' lock; do
+            dir="$(dirname "$lock")"
+            base="$(basename "$lock")"
+            env_name=""
+            is_local=false
+            # .local variants must precede the bare env pattern, which would
+            # otherwise swallow them with env_name="<env>.local".
+            case "$base" in
+              mise.lock) ;;
+              mise.local.lock) is_local=true ;;
+              mise.*.local.lock)
+                env_name="${base#mise.}"
+                env_name="${env_name%.local.lock}"
+                is_local=true
+                ;;
+              mise.*.lock)
+                env_name="${base#mise.}"
+                env_name="${env_name%.lock}"
+                ;;
+              *)
+                echo "skipping unrecognized lockfile $lock"
+                continue
+                ;;
+            esac
+            found=true
+            echo "regenerating $lock"
+            (
+              cd "$dir"
+              if [ -n "$env_name" ]; then
+                export MISE_ENV="$env_name"
+              fi
+              if [ "$is_local" = true ]; then
+                mise lock --local
+              else
+                mise lock
+              fi
+            ) || exit 1
+          done < <(git ls-files -z -- '*mise.lock' '*mise.*.lock' | sort -zu)
+          if [ "$found" = false ]; then
             echo "no mise lockfile in this repo, nothing to do"
-            echo "found=false" >> "$GITHUB_OUTPUT"
-            exit 0
           fi
-          echo "found=true" >> "$GITHUB_OUTPUT"
-          for d in $(echo "$lockfiles" | xargs -n1 dirname | sort -u); do
-            echo "regenerating mise lockfile in $d"
-            (cd "$d" && mise lock) || exit 1
-          done
+          echo "found=$found" >> "$GITHUB_OUTPUT"
       - name: Regenerate dependency-derived files
         if: steps.lockfiles.outputs.found == 'true' && inputs.post_update_task != ''
         env:
