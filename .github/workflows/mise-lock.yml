@@ -222,13 +222,20 @@ jobs:
             git fetch --quiet "$push_url" "$BRANCH" || true
             # --verify --quiet prints nothing on failure; plain rev-parse
             # would echo the literal "FETCH_HEAD" and be mistaken for a sha.
-            remote="$(git rev-parse --verify --quiet FETCH_HEAD^{commit} || true)"
+            remote="$(git rev-parse --verify --quiet "FETCH_HEAD^{commit}" || true)"
             if [ -z "$remote" ] || [ "$remote" = "$base" ]; then
               # The branch is where we left it, so the push itself failed.
               echo "push failed but ${BRANCH} has not moved; retrying (attempt ${attempt})"
               sleep "$((attempt * 5))"
               continue
             fi
+            # Only a Renovate push starts a replacement run of this workflow
+            # (the job's sender gate). If anyone else moved the branch, nothing
+            # will regenerate these artifacts, so we must not exit quietly.
+            case "$(git log -1 --format='%an <%ae>' "$remote" 2>/dev/null)" in
+              *'renovate[bot]'*) moved_by_renovate=true ;;
+              *) moved_by_renovate=false ;;
+            esac
             # 0 = unchanged, 1 = changed, anything else = diff failed.
             config_changed=0
             git diff --quiet "$base" "$remote" -- '*mise.toml' '*mise.lock' '*mise.*.toml' '*mise.*.lock' || config_changed=$?
@@ -243,16 +250,27 @@ jobs:
               # started its own run of this workflow, which regenerates from
               # the new state; pushing ours would only overwrite it with stale
               # content.
-              echo "::notice::${BRANCH} moved and its dependency config changed; the run for that push regenerates these artifacts, so this one stops here"
-              exit 0
+              if [ "$moved_by_renovate" = true ]; then
+                echo "::notice::${BRANCH} moved and its dependency config changed; the run for that push regenerates these artifacts, so this one stops here"
+                exit 0
+              fi
+              echo "::error::${BRANCH} moved and its dependency config changed, but not by renovate[bot], so no run will regenerate these artifacts; rerun this workflow once the branch settles"
+              exit 1
             fi
             # The branch moved for unrelated reasons, so our artifacts still
             # describe the current config: replay them on the new tip.
             echo "${BRANCH} moved without touching the dependency config; rebasing onto ${remote}"
-            if ! git rebase "$remote"; then
+            # --onto replays only the commit made above. A plain rebase would
+            # also replay everything under $base that a force-push dropped,
+            # restoring content Renovate deliberately removed.
+            if ! git rebase --onto "$remote" "$base"; then
               git rebase --abort || true
-              echo "::notice::rebase onto ${remote} conflicted; leaving ${BRANCH} to a newer run"
-              exit 0
+              if [ "$moved_by_renovate" = true ]; then
+                echo "::notice::rebase onto ${remote} conflicted; leaving ${BRANCH} to the run for that push"
+                exit 0
+              fi
+              echo "::error::rebase onto ${remote} conflicted and ${BRANCH} was not moved by renovate[bot], so no run will regenerate these artifacts"
+              exit 1
             fi
             base="$remote"
           done
