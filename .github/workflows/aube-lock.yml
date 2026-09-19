@@ -136,4 +136,51 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'chore(deps): regenerate dependency artifacts'
-          git push "https://x-access-token:${PUSH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH}"
+          # Renovate force-pushes the branch while this job runs, so a plain
+          # push loses the fix to a non-fast-forward rejection (seen on
+          # jdx/hk). Recover by looking at why the branch moved.
+          push_url="https://x-access-token:${PUSH_TOKEN}@github.com/${REPO}.git"
+          base="$(git rev-parse HEAD^)"
+          for attempt in 1 2 3; do
+            if git push "$push_url" "HEAD:${BRANCH}"; then
+              exit 0
+            fi
+            git fetch --quiet "$push_url" "$BRANCH" || true
+            # --verify --quiet prints nothing on failure; plain rev-parse
+            # would echo the literal "FETCH_HEAD" and be mistaken for a sha.
+            remote="$(git rev-parse --verify --quiet FETCH_HEAD^{commit} || true)"
+            if [ -z "$remote" ] || [ "$remote" = "$base" ]; then
+              # The branch is where we left it, so the push itself failed.
+              echo "push failed but ${BRANCH} has not moved; retrying (attempt ${attempt})"
+              sleep "$((attempt * 5))"
+              continue
+            fi
+            # 0 = unchanged, 1 = changed, anything else = diff failed.
+            config_changed=0
+            git diff --quiet "$base" "$remote" -- '*package.json' '*aube-lock.yaml' || config_changed=$?
+            if [ "$config_changed" -gt 1 ]; then
+              echo "could not compare ${base} with ${remote}; retrying (attempt ${attempt})"
+              sleep "$((attempt * 5))"
+              continue
+            fi
+            if [ "$config_changed" -eq 1 ]; then
+              # A newer push changed the inputs these artifacts are generated
+              # from, so what we regenerated is already out of date. That push
+              # started its own run of this workflow, which regenerates from
+              # the new state; pushing ours would only overwrite it with stale
+              # content.
+              echo "::notice::${BRANCH} moved and its dependency config changed; the run for that push regenerates these artifacts, so this one stops here"
+              exit 0
+            fi
+            # The branch moved for unrelated reasons, so our artifacts still
+            # describe the current config: replay them on the new tip.
+            echo "${BRANCH} moved without touching the dependency config; rebasing onto ${remote}"
+            if ! git rebase "$remote"; then
+              git rebase --abort || true
+              echo "::notice::rebase onto ${remote} conflicted; leaving ${BRANCH} to a newer run"
+              exit 0
+            fi
+            base="$remote"
+          done
+          echo "::error::could not push regenerated dependency artifacts to ${BRANCH} after 3 attempts"
+          exit 1
