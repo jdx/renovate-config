@@ -216,14 +216,27 @@ jobs:
           push_url="https://x-access-token:${PUSH_TOKEN}@github.com/${REPO}.git"
           base="$(git rev-parse HEAD^)"
           for attempt in 1 2 3; do
-            if git push "$push_url" "HEAD:${BRANCH}"; then
+            # The lease pins the push to the tip we built on, so it is
+            # rejected rather than silently recreating a branch Renovate
+            # deleted or clobbering a newer one.
+            if git push --force-with-lease="refs/heads/${BRANCH}:${base}" "$push_url" "HEAD:${BRANCH}"; then
               exit 0
             fi
-            git fetch --quiet "$push_url" "$BRANCH" || true
+            # Never retry a push without knowing the branch's current state:
+            # the fetch also fails when Renovate has deleted the branch, and
+            # a blind retry would recreate it.
+            if ! git fetch --quiet "$push_url" "$BRANCH"; then
+              echo "::error::could not fetch ${BRANCH} to see why the push was rejected; not retrying (the branch may have been deleted)"
+              exit 1
+            fi
             # --verify --quiet prints nothing on failure; plain rev-parse
             # would echo the literal "FETCH_HEAD" and be mistaken for a sha.
             remote="$(git rev-parse --verify --quiet "FETCH_HEAD^{commit}" || true)"
-            if [ -z "$remote" ] || [ "$remote" = "$base" ]; then
+            if [ -z "$remote" ]; then
+              echo "::error::fetched ${BRANCH} but could not resolve its tip"
+              exit 1
+            fi
+            if [ "$remote" = "$base" ]; then
               # The branch is where we left it, so the push itself failed.
               echo "push failed but ${BRANCH} has not moved; retrying (attempt ${attempt})"
               sleep "$((attempt * 5))"
