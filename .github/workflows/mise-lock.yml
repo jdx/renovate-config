@@ -212,12 +212,15 @@ jobs:
           # The paths this job changed, so a rejected push can ask whether
           # they are already on the branch.
           changed_paths="$(git diff --cached --name-only)"
+          # The commit this job builds on. Read before committing: the
+          # checkout is a depth-1 shallow clone, where HEAD^ does not resolve
+          # even once a commit sits on top of it.
+          base="$(git rev-parse HEAD)"
           git commit -m 'chore(deps): regenerate dependency artifacts'
           # Renovate force-pushes the branch while this job runs, so a plain
           # push loses the fix to a non-fast-forward rejection (seen on
           # jdx/hk). Recover by looking at why the branch moved.
           push_url="https://x-access-token:${PUSH_TOKEN}@github.com/${REPO}.git"
-          base="$(git rev-parse HEAD^)"
           # Loops until it pushes or gives up: a recovery must always be
           # followed by another push, never left rebased-but-unpushed.
           retries=0
@@ -284,8 +287,13 @@ jobs:
             config_changed=0
             git diff --quiet "$base" "$remote" -- '*mise.toml' '*mise.*.toml' || config_changed=$?
             if [ "$config_changed" -gt 1 ]; then
-              echo "could not compare ${base} with ${remote}; retrying (attempt ${attempt})"
-              sleep "$((attempt * 5))"
+              retries=$((retries + 1))
+              if [ "$retries" -gt 3 ]; then
+                echo "::error::could not compare ${base} with ${remote} after ${retries} attempts"
+                exit 1
+              fi
+              echo "could not compare ${base} with ${remote}; retrying (attempt ${retries})"
+              sleep "$((retries * 5))"
               continue
             fi
             if [ "$config_changed" -eq 1 ]; then
