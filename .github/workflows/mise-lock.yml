@@ -32,6 +32,8 @@ name: mise-lock
 # example a CLI reference rendered by `usage`) pass the mise task that
 # regenerates them as post_update_task, and list those paths under
 # post_update_paths so they are committed alongside the lockfile.
+# Package-manager sidecars under .mise/locks/ (lockfile_version = 2) are
+# committed automatically and need no entry there.
 #
 # Secrets (optional but recommended): MISE_LOCK_APP_ID and
 # MISE_LOCK_APP_PRIVATE_KEY for a GitHub App with contents:write. When
@@ -198,6 +200,21 @@ jobs:
           # keeps git add from running argument-less when nothing matches, and
           # -z/-0 preserves paths containing whitespace.
           git ls-files -z -- '*mise.lock' '*mise.*.lock' | xargs -0 -r git add --
+          # A v2 lockfile pins npm tools through sidecars that `mise lock`
+          # writes under .mise/locks/ beside the lockfile, and it deletes the
+          # previous version's sidecar. A new version's sidecar is untracked,
+          # so the ls-files pass above never sees it: staging only mise.lock
+          # pushed a lockfile pointing at a sidecar that was not committed,
+          # and every locked install failed (jdx/hk#1411). `-A` records the
+          # deletion too. Guarded because git rejects a pathspec that matches
+          # nothing, which is the case for a repo without sidecars.
+          git ls-files -z -- '*mise.lock' '*mise.*.lock' |
+            while IFS= read -r -d '' lock; do
+              locks="$(dirname "$lock")/.mise/locks"
+              if [ -e "$locks" ] || [ -n "$(git ls-files -- "$locks")" ]; then
+                git add -A -- "$locks"
+              fi
+            done
           while IFS= read -r path; do
             if [ -n "$path" ]; then
               git add -- "$path"
