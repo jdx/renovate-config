@@ -19,7 +19,7 @@ name: mise-lock
 #     contents: write
 #   jobs:
 #     mise-lock:
-#       uses: jdx/renovate-config/.github/workflows/mise-lock.yml@<sha>
+#       uses: jdx/renovate-config/.github/workflows/mise-lock.yml@<sha> # vX.Y.Z
 #       with:
 #         post_update_task: render
 #         post_update_paths: |

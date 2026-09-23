@@ -19,7 +19,7 @@ name: aube-lock
 #     contents: write
 #   jobs:
 #     aube-lock:
-#       uses: jdx/renovate-config/.github/workflows/aube-lock.yml@<sha>
+#       uses: jdx/renovate-config/.github/workflows/aube-lock.yml@<sha> # vX.Y.Z
 #       with:
 #         post_update_task: renovate:post-update
 #         post_update_paths: |

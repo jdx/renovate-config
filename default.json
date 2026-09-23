@@ -281,6 +281,7 @@
         "jdx/hk",
         "jdx/mise",
         "jdx/pitchfork",
+        "jdx/renovate-config",
         "jdx/ubi",
         "jdx/usage",
         "jdx/wait-for-gh-rate-limit",
