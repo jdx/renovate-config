@@ -26,6 +26,7 @@
         "minor",
         "patch",
         "digest",
+        "pinDigest",
         "lockFileMaintenance"
       ]
     },
@@ -36,7 +37,8 @@
       "matchUpdateTypes": [
         "minor",
         "patch",
-        "digest"
+        "digest",
+        "pinDigest"
       ]
     },
     {
@@ -49,7 +51,8 @@
       "matchUpdateTypes": [
         "minor",
         "patch",
-        "digest"
+        "digest",
+        "pinDigest"
       ]
     },
     {
@@ -62,7 +65,8 @@
       "matchUpdateTypes": [
         "minor",
         "patch",
-        "digest"
+        "digest",
+        "pinDigest"
       ]
     },
     {
@@ -75,7 +79,8 @@
       "matchUpdateTypes": [
         "minor",
         "patch",
-        "digest"
+        "digest",
+        "pinDigest"
       ]
     },
     {
@@ -88,7 +93,8 @@
       "matchUpdateTypes": [
         "minor",
         "patch",
-        "digest"
+        "digest",
+        "pinDigest"
       ]
     },
     {
@@ -102,7 +108,8 @@
       "matchUpdateTypes": [
         "minor",
         "patch",
-        "digest"
+        "digest",
+        "pinDigest"
       ]
     },
     {
@@ -245,7 +252,8 @@
       "matchUpdateTypes": [
         "minor",
         "patch",
-        "digest"
+        "digest",
+        "pinDigest"
       ]
     },
     {
