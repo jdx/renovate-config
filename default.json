@@ -30,6 +30,82 @@
       ]
     },
     {
+      "description": "Group non-major updates into one PR per ecosystem; the rules below split them by manager",
+      "groupName": "non-major dependencies",
+      "groupSlug": "non-major",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ]
+    },
+    {
+      "description": "Group non-major Rust crate updates",
+      "groupName": "rust crates",
+      "groupSlug": "cargo-non-major",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ]
+    },
+    {
+      "description": "Group non-major GitHub Actions updates",
+      "groupName": "github actions",
+      "groupSlug": "github-actions-non-major",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ]
+    },
+    {
+      "description": "Group non-major mise tool updates",
+      "groupName": "mise tools",
+      "groupSlug": "mise-non-major",
+      "matchManagers": [
+        "mise"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ]
+    },
+    {
+      "description": "Group non-major npm updates",
+      "groupName": "npm packages",
+      "groupSlug": "npm-non-major",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ]
+    },
+    {
+      "description": "Group non-major container image updates",
+      "groupName": "docker images",
+      "groupSlug": "docker-non-major",
+      "matchManagers": [
+        "dockerfile",
+        "docker-compose"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ]
+    },
+    {
       "description": "Do not delay jdx-owned crates",
       "matchDatasources": [
         "crate"
@@ -100,6 +176,79 @@
       ]
     },
     {
+      "description": "Group non-major jdx-owned crate updates so each release opens one PR per repo",
+      "groupName": "jdx crates",
+      "groupSlug": "jdx-crates",
+      "matchDatasources": [
+        "crate"
+      ],
+      "matchPackageNames": [
+        "aqua-registry",
+        "asset-picker",
+        "aube",
+        "aube-codes",
+        "aube-linker",
+        "aube-lockfile",
+        "aube-manifest",
+        "aube-registry",
+        "aube-resolver",
+        "aube-runtime",
+        "aube-scripts",
+        "aube-settings",
+        "aube-store",
+        "aube-util",
+        "aube-workspace",
+        "cible",
+        "cible-core",
+        "clap-sort",
+        "clap_usage",
+        "clonedir",
+        "clonedir_lib",
+        "clx",
+        "communique",
+        "deepmerge",
+        "deepmerge-derive",
+        "demand",
+        "ensembler",
+        "entrepot",
+        "expr-lang",
+        "fnox",
+        "fnox-core",
+        "gabarit",
+        "garni",
+        "hk",
+        "jdx-csv-lint",
+        "jdx-tar",
+        "mise",
+        "mise-cache",
+        "mise-interactive-config",
+        "mise-sigstore",
+        "nd",
+        "nd_lib",
+        "osv-bloom",
+        "osv-bloom-build",
+        "pitchfork-cli",
+        "pklr",
+        "quick-bool",
+        "rpkl-jdx",
+        "rtx-cli",
+        "sigstore-verification",
+        "spinners-jdxcode",
+        "tak-cli",
+        "usage-cli",
+        "usage-lib",
+        "usage_example_rust_clap",
+        "vfox",
+        "wait-for-gh-rate-limit",
+        "xx"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ]
+    },
+    {
       "description": "Do not delay jdx-owned CLI tool releases",
       "matchPackageNames": [
         "aqua:jdx/aube",
@@ -151,5 +300,6 @@
   "schedule": [
     "* * * * 2"
   ],
-  "timezone": "America/Chicago"
+  "timezone": "America/Chicago",
+  "rebaseWhen": "conflicted"
 }
