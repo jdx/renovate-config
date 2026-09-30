@@ -164,11 +164,40 @@ jobs:
               if [ -n "$env_name" ]; then
                 export MISE_ENV="$env_name"
               fi
-              if [ "$is_local" = true ]; then
-                mise lock --local
-              else
-                mise lock
-              fi
+              # `mise lock` can exit 0 while leaving a tool's platform blocks
+              # on the previous release (seen on jdx/usage#1520, minutes after
+              # aube 2.6.1 was published: 6 aube entries skipped, then the
+              # next `mise install` refused the mismatch). A dry-run install
+              # reports that mismatch without downloading anything, so check
+              # for it and re-resolve a few times before pushing a lockfile
+              # that would fail CI.
+              attempt=1
+              while true; do
+                # errexit is off inside a subshell that is the left side of
+                # `||`, so a failed `mise lock` must exit explicitly.
+                if [ "$is_local" = true ]; then
+                  mise lock --local || exit 1
+                else
+                  mise lock || exit 1
+                fi
+                if check="$(mise install --dry-run 2>&1)"; then
+                  break
+                fi
+                if ! grep -q 'is locked to a download URL from' <<< "$check"; then
+                  # Some other reason the install cannot proceed; not
+                  # something re-locking fixes, so keep the old behavior.
+                  echo "::warning::mise install --dry-run failed for $lock: $check"
+                  break
+                fi
+                if [ "$attempt" -ge 4 ]; then
+                  echo "::error::$lock still has stale platform entries after $attempt attempts"
+                  echo "$check" >&2
+                  exit 1
+                fi
+                echo "$lock still has stale platform entries (attempt $attempt); retrying"
+                sleep "$((attempt * 30))"
+                attempt=$((attempt + 1))
+              done
             ) || exit 1
           done < <(git ls-files -z -- '*mise.lock' '*mise.*.lock' | sort -zu)
           if [ "$found" = false ]; then
