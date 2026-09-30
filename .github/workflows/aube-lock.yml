@@ -156,6 +156,26 @@ jobs:
             echo "regenerating aube-lock.yaml in $d"
             (cd "$d" && mise x -- aube install --no-frozen-lockfile) || exit 1
           done
+      # Runs after the aube regeneration and before post_update_task: a
+      # modified tracked file makes the `git rebase --onto` recovery in the
+      # commit step refuse to run, which it would misread as a conflict, so the
+      # runner-local mise.lock refresh from "Install mise tools" has to go, along
+      # with the .mise/locks sidecars a v2 lockfile keeps for npm tools (which
+      # `mise lock` rewrites and deletes; sidecars for a new version are
+      # untracked, so they are cleared too). Doing it before post_update_task
+      # rather than at commit time keeps it from discarding anything that task
+      # generates and lists in post_update_paths. The tools are already
+      # installed, so the stale lockfile no longer matters to mise.
+      - name: Discard runner-local mise.lock changes
+        if: steps.lockfiles.outputs.found == 'true'
+        run: |
+          if git ls-files --error-unmatch -- mise.lock >/dev/null 2>&1; then
+            git restore -- mise.lock
+            if [ -n "$(git ls-files -- .mise/locks)" ]; then
+              git restore -- .mise/locks
+            fi
+            git clean -fdq -- .mise/locks
+          fi
       - name: Regenerate dependency-derived files
         if: steps.lockfiles.outputs.found == 'true' && inputs.post_update_task != ''
         env:
@@ -169,20 +189,6 @@ jobs:
           BRANCH: ${{ github.ref_name }}
           POST_UPDATE_PATHS: ${{ inputs.post_update_paths }}
         run: |
-          # Drop the runner-local mise.lock refresh from "Install mise tools",
-          # including the .mise/locks sidecars a v2 lockfile keeps for npm
-          # tools, which `mise lock` rewrites and deletes: a modified tracked
-          # file makes the `git rebase --onto` recovery below refuse to run,
-          # which it would misread as a conflict. Sidecars for a new version
-          # are untracked; clear them so a post_update_paths of `.` cannot
-          # stage them.
-          if git ls-files --error-unmatch -- mise.lock >/dev/null 2>&1; then
-            git restore -- mise.lock
-            if [ -n "$(git ls-files -- .mise/locks)" ]; then
-              git restore -- .mise/locks
-            fi
-            git clean -fdq -- .mise/locks
-          fi
           git add -- '*aube-lock.yaml'
           while IFS= read -r path; do
             if [ -n "$path" ]; then

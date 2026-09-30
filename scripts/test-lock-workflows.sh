@@ -59,9 +59,7 @@ EOF
 
 extract mise-lock.yml "Regenerate mise lockfiles" > "$work/mise-lock.sh"
 extract aube-lock.yml "Install mise tools" > "$work/aube-install.sh"
-# Only the part of the commit step that runs before anything is staged: the
-# rest pushes to GitHub.
-extract aube-lock.yml "Commit and push if changed" | sed "/git add -- '\*aube-lock.yaml'/,\$d" > "$work/aube-cleanup.sh"
+extract aube-lock.yml "Discard runner-local mise.lock changes" > "$work/aube-cleanup.sh"
 
 failures=0
 out=""
@@ -164,7 +162,7 @@ check "no tracked mise.lock does a plain install" rc_is 0
 check "  never locks" eq "$(lock_calls)" 0
 check "  installs without --locked" eq "$(cat "$STATE/installs")" "install"
 
-echo "aube-lock.yml (before commit)"
+echo "aube-lock.yml (discarding the runner-local refresh)"
 # What "Install mise tools" leaves behind for a v2 lockfile: a modified
 # lockfile, a rewritten and a deleted tracked sidecar, and a new untracked one.
 run aube-cleanup.sh mise.lock
@@ -188,6 +186,19 @@ dirty() { [ -z "$(git -C "$work/repo" status --porcelain --untracked-files=all -
 check "runner-local lockfile and sidecar changes are discarded" dirty
 check "  leaves the regenerated aube-lock.yaml alone" grep -q generated "$work/repo/aube-lock.yaml"
 check "  lets git rebase --onto start" git -C "$work/repo" -c user.email=t@t -c user.name=t rebase --onto HEAD HEAD
+
+# The discard must not run at commit time, or it would delete files that
+# post_update_task generates and the caller lists in post_update_paths.
+step_order() {
+  python3 -c '
+import sys, yaml
+steps = next(iter(yaml.safe_load(open(sys.argv[1]))["jobs"].values()))["steps"]
+names = [s.get("name") for s in steps]
+discard = names.index("Discard runner-local mise.lock changes")
+assert names.index("Regenerate aube lockfiles") < discard < names.index("Regenerate dependency-derived files")
+' "$root/.github/workflows/aube-lock.yml"
+}
+check "discard runs after aube regeneration and before post_update_task" step_order
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures check(s) failed"
