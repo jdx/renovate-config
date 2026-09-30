@@ -93,7 +93,53 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # `install: false` is load-bearing: when Renovate bumps a mise tool it
+      # rewrites only the `version =` line of mise.lock, so the per-platform
+      # blocks are stale and mise-action's default `mise install --locked`
+      # fails before this job can do anything. That is worst when the bumped
+      # tool is aube itself, which this job needs. mise-lock.yml regenerates
+      # the lockfile in a sibling job, but the two run in parallel, so this
+      # job refreshes its own copy below before installing.
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          install: false
+      - name: Install mise tools
+        env:
+          # `mise lock` resolves releases through the GitHub API; without a
+          # token it is rate limited per runner IP.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ -z "$(git ls-files -- mise.lock)" ]; then
+            mise install
+            exit 0
+          fi
+          # The refresh is local to this runner: only aube-lock.yaml and the
+          # post_update_paths are committed below, and mise-lock.yml owns
+          # committing mise.lock. `mise lock` can exit 0 while leaving a tool's
+          # platform blocks on the previous release right after that release is
+          # published, so confirm with a dry-run install and re-resolve.
+          attempt=1
+          while true; do
+            # Safe mode keeps `mise lock` from executing project config.
+            MISE_SAFE=1 mise lock
+            if check="$(mise install --dry-run 2>&1)"; then
+              break
+            fi
+            if ! grep -q 'is locked to a download URL from' <<< "$check"; then
+              # Not something re-locking fixes; let the install report it.
+              break
+            fi
+            if [ "$attempt" -ge 4 ]; then
+              echo "::error::mise.lock still has stale platform entries after $attempt attempts"
+              echo "$check" >&2
+              exit 1
+            fi
+            echo "mise.lock still has stale platform entries (attempt $attempt); retrying"
+            sleep "$((attempt * 30))"
+            attempt=$((attempt + 1))
+          done
+          mise install --locked
       - name: Regenerate aube lockfiles
         id: lockfiles
         # regenerate every tracked aube-lock.yaml, not just the root one:
@@ -110,6 +156,26 @@ jobs:
             echo "regenerating aube-lock.yaml in $d"
             (cd "$d" && mise x -- aube install --no-frozen-lockfile) || exit 1
           done
+      # Runs after the aube regeneration and before post_update_task: a
+      # modified tracked file makes the `git rebase --onto` recovery in the
+      # commit step refuse to run, which it would misread as a conflict, so the
+      # runner-local mise.lock refresh from "Install mise tools" has to go, along
+      # with the .mise/locks sidecars a v2 lockfile keeps for npm tools (which
+      # `mise lock` rewrites and deletes; sidecars for a new version are
+      # untracked, so they are cleared too). Doing it before post_update_task
+      # rather than at commit time keeps it from discarding anything that task
+      # generates and lists in post_update_paths. The tools are already
+      # installed, so the stale lockfile no longer matters to mise.
+      - name: Discard runner-local mise.lock changes
+        if: steps.lockfiles.outputs.found == 'true'
+        run: |
+          if git ls-files --error-unmatch -- mise.lock >/dev/null 2>&1; then
+            git restore -- mise.lock
+            if [ -n "$(git ls-files -- .mise/locks)" ]; then
+              git restore -- .mise/locks
+            fi
+            git clean -fdq -- .mise/locks
+          fi
       - name: Regenerate dependency-derived files
         if: steps.lockfiles.outputs.found == 'true' && inputs.post_update_task != ''
         env:

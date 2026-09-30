@@ -1,0 +1,39 @@
+name: test
+
+# Regression tests for the reusable workflows' shell logic. See
+# scripts/test-lock-workflows.sh.
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/aube-lock.yml
+      - .github/workflows/mise-lock.yml
+      - .github/workflows/test.yml
+      - scripts/test-lock-workflows.sh
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/aube-lock.yml
+      - .github/workflows/mise-lock.yml
+      - .github/workflows/test.yml
+      - scripts/test-lock-workflows.sh
+
+permissions:
+  contents: read
+
+jobs:
+  lock-workflows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # A venv, because pip refuses to install into the runner's system Python
+      # (PEP 668).
+      - name: Install PyYAML
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet pyyaml
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+      - name: Test lockfile workflows
+        run: scripts/test-lock-workflows.sh
