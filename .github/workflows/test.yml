@@ -1,0 +1,34 @@
+name: test
+
+# Regression tests for the reusable workflows' shell logic. See
+# scripts/test-lock-workflows.sh.
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/aube-lock.yml
+      - .github/workflows/mise-lock.yml
+      - .github/workflows/test.yml
+      - scripts/test-lock-workflows.sh
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/aube-lock.yml
+      - .github/workflows/mise-lock.yml
+      - .github/workflows/test.yml
+      - scripts/test-lock-workflows.sh
+
+permissions:
+  contents: read
+
+jobs:
+  lock-workflows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install PyYAML
+        run: python3 -m pip install --quiet pyyaml
+      - name: Test lockfile workflows
+        run: scripts/test-lock-workflows.sh
