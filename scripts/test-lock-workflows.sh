@@ -59,6 +59,9 @@ EOF
 
 extract mise-lock.yml "Regenerate mise lockfiles" > "$work/mise-lock.sh"
 extract aube-lock.yml "Install mise tools" > "$work/aube-install.sh"
+# Only the part of the commit step that runs before anything is staged: the
+# rest pushes to GitHub.
+extract aube-lock.yml "Commit and push if changed" | sed "/git add -- '\*aube-lock.yaml'/,\$d" > "$work/aube-cleanup.sh"
 
 failures=0
 out=""
@@ -160,6 +163,31 @@ run aube-install.sh
 check "no tracked mise.lock does a plain install" rc_is 0
 check "  never locks" eq "$(lock_calls)" 0
 check "  installs without --locked" eq "$(cat "$STATE/installs")" "install"
+
+echo "aube-lock.yml (before commit)"
+# What "Install mise tools" leaves behind for a v2 lockfile: a modified
+# lockfile, a rewritten and a deleted tracked sidecar, and a new untracked one.
+run aube-cleanup.sh mise.lock
+(
+  cd "$work/repo"
+  mkdir -p .mise/locks/prettier/1/node_modules .mise/locks/prettier/2/node_modules
+  echo old > .mise/locks/prettier/1/node_modules/.aube-lock.yaml
+  echo keep > .mise/locks/prettier/2/node_modules/.aube-lock.yaml
+  git add .mise
+  git -c user.email=t@t -c user.name=t commit -qm base
+  echo refreshed > mise.lock
+  echo refreshed > .mise/locks/prettier/2/node_modules/.aube-lock.yaml
+  rm .mise/locks/prettier/1/node_modules/.aube-lock.yaml
+  mkdir -p .mise/locks/prettier/3/node_modules
+  echo new > .mise/locks/prettier/3/node_modules/.aube-lock.yaml
+  echo generated > aube-lock.yaml
+)
+rc=0
+out="$(cd "$work/repo" && PATH="$work/bin:$PATH" bash -e "$work/aube-cleanup.sh" 2>&1)" || rc=$?
+dirty() { [ -z "$(git -C "$work/repo" status --porcelain --untracked-files=all -- . ':!aube-lock.yaml')" ]; }
+check "runner-local lockfile and sidecar changes are discarded" dirty
+check "  leaves the regenerated aube-lock.yaml alone" grep -q generated "$work/repo/aube-lock.yaml"
+check "  lets git rebase --onto start" git -C "$work/repo" -c user.email=t@t -c user.name=t rebase --onto HEAD HEAD
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures check(s) failed"
