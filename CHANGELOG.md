@@ -1,6 +1,21 @@
 # Changelog
 
 ---
+## [1.0.2](https://github.com/jdx/renovate-config/compare/v1.0.1..v1.0.2) - 2026-10-05
+
+### 🐛 Bug Fixes
+
+- keep lockfile regeneration working when mise.lock is stale (#34) by [@jdx](https://github.com/jdx) in [#34](https://github.com/jdx/renovate-config/pull/34)
+
+### ⚙️ Miscellaneous Tasks
+
+- **(entire)** store checkpoints in a private repository by [@jdx](https://github.com/jdx) in [3574f0c](https://github.com/jdx/renovate-config/commit/3574f0cfc6639f3411b63779a49a2f93aa252b24)
+- **(entire)** commit codex session hooks by [@jdx](https://github.com/jdx) in [3d8e284](https://github.com/jdx/renovate-config/commit/3d8e28464371186f01247209e322fa99cc530d96)
+- **(entire)** commit claude session hooks by [@jdx](https://github.com/jdx) in [41a0a4d](https://github.com/jdx/renovate-config/commit/41a0a4dc5141e94de8afc98592a267bcd8566542)
+- **(entire)** restore lower-cost trail findings by [@jdx](https://github.com/jdx) in [567d5c0](https://github.com/jdx/renovate-config/commit/567d5c0d9755258665f13a6aeae84a75e2e05cef)
+- do not delay jdx/workflows releases (#33) by [@jdx](https://github.com/jdx) in [#33](https://github.com/jdx/renovate-config/pull/33)
+
+---
 ## [1.0.1](https://github.com/jdx/renovate-config/compare/v1.0.0..v1.0.1) - 2026-09-28
 
 ### 🐛 Bug Fixes
