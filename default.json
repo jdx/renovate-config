@@ -110,6 +110,30 @@
       ]
     },
     {
+      "description": "Group non-major Go module updates",
+      "groupName": "go modules",
+      "groupSlug": "gomod-non-major",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pinDigest"
+      ]
+    },
+    {
+      "description": "The go directive in go.mod is the minimum Go version for library users, not the toolchain; bump it by hand",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "golang"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Group non-major container image updates",
       "groupName": "docker images",
       "groupSlug": "docker-non-major",
@@ -319,6 +343,9 @@
         "lockFileMaintenance"
       ]
     }
+  ],
+  "postUpdateOptions": [
+    "gomodTidy"
   ],
   "prHourlyLimit": 10,
   "schedule": [
