@@ -1,6 +1,9 @@
 tasks.release-plz = "./scripts/release-plz.sh"
 
 [tools]
+hk = 'latest'
+pkl = 'latest'
+jactionlint = 'latest'
 git-cliff = 'latest'
 gh = 'latest'
 communique = { version = 'latest', minimum_release_age = '0s' }
