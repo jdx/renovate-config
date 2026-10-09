@@ -5,7 +5,7 @@ VERSION="$(grep -m1 -oE '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' CHANGELOG.md | grep -oE
 MAJOR_VERSION=$(echo "$VERSION" | cut -d. -f1)
 
 # Configure git to use gh's credential helper. The checkout step uses
-# persist-credentials: false (per zizmor's artipacked audit), so the
+# persist-credentials: false (to satisfy the `artipacked` audit), so the
 # token isn't written to .git/config and raw `git push` would 403.
 gh auth setup-git
 
@@ -16,7 +16,7 @@ git tag "v$VERSION" || echo "Tag v$VERSION already exists locally"
 git push origin "v$VERSION" || echo "Tag v$VERSION already exists on remote"
 
 # set the major version tag to this release. Callers should still pin the
-# exact version's sha: a moving tag in a `# v1` comment trips zizmor's
+# exact version's sha: a moving tag in a `# v1` comment trips the
 # ref-version-mismatch audit the next time it moves.
 git tag "v$MAJOR_VERSION" -f
 # push the major version tag to github (retry with pull if it fails)

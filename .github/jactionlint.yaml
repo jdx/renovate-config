@@ -1,0 +1,7 @@
+ignores:
+  - rule: bot-conditions
+    file: .github/workflows/{aube,mise}-lock.yml
+    reason: >-
+      These reusable workflows run for `push` events to renovate/** branches, where there is no pull request to take an author from.
+      Only someone with write access can push, and the check exists to skip any push that is not Renovate's own (including the
+      fix-up push of this workflow), so comparing the immutable numeric id of the sender is the intended guard.

@@ -73,6 +73,11 @@ jobs:
     # different sender, so this also prevents self-retriggering.
     if: github.event.sender.id == 29139614 # renovate[bot]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # pushes the regenerated lockfiles back to the Renovate branch; the caller
+    # grants it (see the example above) and a reusable workflow cannot widen it
+    permissions:
+      contents: write
     concurrency:
       group: aube-lock-${{ github.ref }}
       cancel-in-progress: true
@@ -152,7 +157,9 @@ jobs:
             exit 0
           fi
           echo "found=true" >> "$GITHUB_OUTPUT"
-          for d in $(git ls-files -- '*aube-lock.yaml' | xargs -n1 dirname); do
+          lockfiles="$(git ls-files -- '*aube-lock.yaml')"
+          for lockfile in $lockfiles; do
+            d="$(dirname "$lockfile")"
             echo "regenerating aube-lock.yaml in $d"
             (cd "$d" && mise x -- aube install --no-frozen-lockfile) || exit 1
           done

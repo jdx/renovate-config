@@ -75,6 +75,11 @@ jobs:
     # different sender, so this also prevents self-retriggering.
     if: github.event.sender.id == 29139614 # renovate[bot]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # pushes the regenerated lockfiles back to the Renovate branch; the caller
+    # grants it (see the example above) and a reusable workflow cannot widen it
+    permissions:
+      contents: write
     concurrency:
       group: mise-lock-${{ github.ref }}
       cancel-in-progress: true

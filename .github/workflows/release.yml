@@ -7,8 +7,14 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # never cancel a release half way through tagging
+  cancel-in-progress: false
+
 jobs:
   release:
+    timeout-minutes: 15
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
     runs-on: ubuntu-latest
     permissions:
@@ -34,6 +40,7 @@ jobs:
   enhance-release:
     needs: [release]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:

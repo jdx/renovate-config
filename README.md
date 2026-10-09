@@ -18,8 +18,8 @@ version as a comment:
 uses: jdx/renovate-config/.github/workflows/mise-lock.yml@<sha> # v1.0.0
 ```
 
-Don't pin with a `# main` comment. zizmor's `ref-version-mismatch` audit
-fails every caller as soon as `main` moves past the pinned commit. Renovate
+Don't pin with a `# main` comment. the `ref-version-mismatch` audit of
+workflow linters fails every caller as soon as `main` moves past the pinned commit. Renovate
 bumps pinned tags like any other action, and this preset releases them
 without the usual delay.
 
