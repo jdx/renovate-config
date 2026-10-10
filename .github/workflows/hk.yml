@@ -22,3 +22,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
       - run: mise x hk -- hk check --all
+        env:
+          # jactionlint's online checks (known-vulnerable actions, impostor commits, stale refs) run in CI only.
+          JACTIONLINT_ONLINE: 1
+          GITHUB_TOKEN: ${{ github.token }}
