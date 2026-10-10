@@ -1,7 +1,19 @@
 # Changelog
 
 ---
-## [1.0.2](https://github.com/jdx/renovate-config/compare/v1.0.1..v1.0.2) - 2026-10-05
+## [1.1.0](https://github.com/jdx/renovate-config/compare/v1.0.2..v1.1.0) - 2026-10-10
+
+### 🚀 Features
+
+- add Go module settings (#39) by [@jdx](https://github.com/jdx) in [#39](https://github.com/jdx/renovate-config/pull/39)
+
+### ⚙️ Miscellaneous Tasks
+
+- **(ci)** lint workflows with jactionlint (#37) by [@jdx](https://github.com/jdx) in [#37](https://github.com/jdx/renovate-config/pull/37)
+- **(ci)** switch to jactionlint v2 (#40) by [@jdx](https://github.com/jdx) in [#40](https://github.com/jdx/renovate-config/pull/40)
+
+---
+## [1.0.2](https://github.com/jdx/renovate-config/compare/v1.0.1..v1.0.2) - 2026-10-06
 
 ### 🐛 Bug Fixes
 
