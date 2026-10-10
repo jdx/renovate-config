@@ -3,7 +3,8 @@ tasks.release-plz = "./scripts/release-plz.sh"
 [tools]
 hk = 'latest'
 pkl = 'latest'
-jactionlint = { version = "2", minimum_release_age = "0s" }
+# Exact pin: jactionlint 2.0.2 is newer than the default 24h release-age holdback until 2026-10-10 20:00Z. Loosen to the previous selector after that.
+jactionlint = "2.0.2"
 git-cliff = 'latest'
 gh = 'latest'
 communique = { version = 'latest', minimum_release_age = '0s' }

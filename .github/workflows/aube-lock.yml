@@ -151,13 +151,15 @@ jobs:
         # repos like jdx/hk keep a nested docs/aube-lock.yaml alongside the
         # root lockfile. the git pathspec '*aube-lock.yaml' matches both.
         run: |
-          if [ -z "$(git ls-files -- '*aube-lock.yaml')" ]; then
+          # list first, in an assignment of its own: a failing git then stops
+          # the step (bash -e) instead of reading as "no lockfiles".
+          lockfiles="$(git ls-files -- '*aube-lock.yaml')"
+          if [ -z "$lockfiles" ]; then
             echo "no aube-lock.yaml in this repo, nothing to do"
             echo "found=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           echo "found=true" >> "$GITHUB_OUTPUT"
-          lockfiles="$(git ls-files -- '*aube-lock.yaml')"
           for lockfile in $lockfiles; do
             d="$(dirname "$lockfile")"
             echo "regenerating aube-lock.yaml in $d"
@@ -178,7 +180,8 @@ jobs:
         run: |
           if git ls-files --error-unmatch -- mise.lock >/dev/null 2>&1; then
             git restore -- mise.lock
-            if [ -n "$(git ls-files -- .mise/locks)" ]; then
+            tracked_sidecars="$(git ls-files -- .mise/locks)"
+            if [ -n "$tracked_sidecars" ]; then
               git restore -- .mise/locks
             fi
             git clean -fdq -- .mise/locks
