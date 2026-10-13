@@ -105,7 +105,7 @@ jobs:
       # tool is aube itself, which this job needs. mise-lock.yml regenerates
       # the lockfile in a sibling job, but the two run in parallel, so this
       # job refreshes its own copy below before installing.
-      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
         with:
           install: false
       - name: Install mise tools
