@@ -33,6 +33,11 @@ name: aube-lock
 # generated files under post_update_paths so the workflow can commit them
 # alongside the lockfile without staging unrelated tracked changes.
 #
+# Migration: this secret was AUBE_LOCK_APP_ID (a numeric App ID). Passing an
+# undeclared secret makes GitHub reject the whole call, so a caller that
+# bumps its pin must rename the mapping to AUBE_LOCK_APP_CLIENT_ID and store
+# the App's client ID (Iv...) under it.
+#
 # Secrets (optional but recommended): AUBE_LOCK_APP_CLIENT_ID and
 # AUBE_LOCK_APP_PRIVATE_KEY for a GitHub App with contents:write. When
 # present, the lockfile commit is pushed with a short-lived App token so
