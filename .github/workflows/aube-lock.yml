@@ -25,7 +25,7 @@ name: aube-lock
 #         post_update_paths: |
 #           worker-configuration.d.ts
 #       secrets:
-#         AUBE_LOCK_APP_ID: ${{ secrets.AUBE_LOCK_APP_ID }}
+#         AUBE_LOCK_APP_CLIENT_ID: ${{ secrets.AUBE_LOCK_APP_CLIENT_ID }}
 #         AUBE_LOCK_APP_PRIVATE_KEY: ${{ secrets.AUBE_LOCK_APP_PRIVATE_KEY }}
 #
 # Callers can define a mise task for generated files that depend on the
@@ -33,7 +33,12 @@ name: aube-lock
 # generated files under post_update_paths so the workflow can commit them
 # alongside the lockfile without staging unrelated tracked changes.
 #
-# Secrets (optional but recommended): AUBE_LOCK_APP_ID and
+# Migration: this secret was AUBE_LOCK_APP_ID (a numeric App ID). Passing an
+# undeclared secret makes GitHub reject the whole call, so a caller that
+# bumps its pin must rename the mapping to AUBE_LOCK_APP_CLIENT_ID and store
+# the App's client ID (Iv...) under it.
+#
+# Secrets (optional but recommended): AUBE_LOCK_APP_CLIENT_ID and
 # AUBE_LOCK_APP_PRIVATE_KEY for a GitHub App with contents:write. When
 # present, the lockfile commit is pushed with a short-lived App token so
 # it retriggers CI on the Renovate branch. Without them the workflow
@@ -59,8 +64,8 @@ on:
         type: string
         default: ""
     secrets:
-      AUBE_LOCK_APP_ID:
-        description: GitHub App ID used to push lockfile commits (optional)
+      AUBE_LOCK_APP_CLIENT_ID:
+        description: GitHub App client ID used to push lockfile commits (optional)
         required: false
       AUBE_LOCK_APP_PRIVATE_KEY:
         description: GitHub App private key used to push lockfile commits (optional)
@@ -85,14 +90,14 @@ jobs:
       # secrets context is not allowed in step-level `if`; surface the
       # presence check via env. Both secrets must be set, otherwise fall
       # back to GITHUB_TOKEN instead of failing the token step
-      AUBE_LOCK_HAS_APP: ${{ secrets.AUBE_LOCK_APP_ID != '' && secrets.AUBE_LOCK_APP_PRIVATE_KEY != '' }}
+      AUBE_LOCK_HAS_APP: ${{ secrets.AUBE_LOCK_APP_CLIENT_ID != '' && secrets.AUBE_LOCK_APP_PRIVATE_KEY != '' }}
     steps:
       - name: Generate app token
         id: app-token
         if: env.AUBE_LOCK_HAS_APP == 'true'
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ secrets.AUBE_LOCK_APP_ID }}
+          client-id: ${{ secrets.AUBE_LOCK_APP_CLIENT_ID }}
           private-key: ${{ secrets.AUBE_LOCK_APP_PRIVATE_KEY }}
           permission-contents: write
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

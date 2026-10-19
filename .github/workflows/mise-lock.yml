@@ -25,7 +25,7 @@ name: mise-lock
 #         post_update_paths: |
 #           content/cli
 #       secrets:
-#         MISE_LOCK_APP_ID: ${{ secrets.MISE_LOCK_APP_ID }}
+#         MISE_LOCK_APP_CLIENT_ID: ${{ secrets.MISE_LOCK_APP_CLIENT_ID }}
 #         MISE_LOCK_APP_PRIVATE_KEY: ${{ secrets.MISE_LOCK_APP_PRIVATE_KEY }}
 #
 # Callers whose generated files depend on the locked tool versions (for
@@ -35,7 +35,12 @@ name: mise-lock
 # Package-manager sidecars under .mise/locks/ (lockfile_version = 2) are
 # committed automatically and need no entry there.
 #
-# Secrets (optional but recommended): MISE_LOCK_APP_ID and
+# Migration: this secret was MISE_LOCK_APP_ID (a numeric App ID). Passing an
+# undeclared secret makes GitHub reject the whole call, so a caller that
+# bumps its pin must rename the mapping to MISE_LOCK_APP_CLIENT_ID and store
+# the App's client ID (Iv...) under it.
+#
+# Secrets (optional but recommended): MISE_LOCK_APP_CLIENT_ID and
 # MISE_LOCK_APP_PRIVATE_KEY for a GitHub App with contents:write. When
 # present, the lockfile commit is pushed with a short-lived App token so
 # it retriggers CI on the Renovate branch. Without them the workflow
@@ -61,8 +66,8 @@ on:
         type: string
         default: ""
     secrets:
-      MISE_LOCK_APP_ID:
-        description: GitHub App ID used to push lockfile commits (optional)
+      MISE_LOCK_APP_CLIENT_ID:
+        description: GitHub App client ID used to push lockfile commits (optional)
         required: false
       MISE_LOCK_APP_PRIVATE_KEY:
         description: GitHub App private key used to push lockfile commits (optional)
@@ -87,14 +92,14 @@ jobs:
       # secrets context is not allowed in step-level `if`; surface the
       # presence check via env. Both secrets must be set, otherwise fall
       # back to GITHUB_TOKEN instead of failing the token step
-      MISE_LOCK_HAS_APP: ${{ secrets.MISE_LOCK_APP_ID != '' && secrets.MISE_LOCK_APP_PRIVATE_KEY != '' }}
+      MISE_LOCK_HAS_APP: ${{ secrets.MISE_LOCK_APP_CLIENT_ID != '' && secrets.MISE_LOCK_APP_PRIVATE_KEY != '' }}
     steps:
       - name: Generate app token
         id: app-token
         if: env.MISE_LOCK_HAS_APP == 'true'
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ secrets.MISE_LOCK_APP_ID }}
+          client-id: ${{ secrets.MISE_LOCK_APP_CLIENT_ID }}
           private-key: ${{ secrets.MISE_LOCK_APP_PRIVATE_KEY }}
           permission-contents: write
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
