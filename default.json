@@ -32,6 +32,49 @@
   "minimumReleaseAge": "7 days",
   "packageRules": [
     {
+      "description": "Update these repositories on Mondays instead of the default day",
+      "matchRepositories": [
+        "jdx/hk",
+        "jdx/pitchfork",
+        "jdx/pklr"
+      ],
+      "schedule": [
+        "* * * * 1"
+      ]
+    },
+    {
+      "description": "Update these repositories on Wednesdays instead of the default day",
+      "matchRepositories": [
+        "jdx/aube",
+        "jdx/fnox",
+        "jdx/tak"
+      ],
+      "schedule": [
+        "* * * * 3"
+      ]
+    },
+    {
+      "description": "Update these repositories on Thursdays instead of the default day",
+      "matchRepositories": [
+        "jdx/usage",
+        "jdx/communique",
+        "jdx/xx",
+        "jdx/demand"
+      ],
+      "schedule": [
+        "* * * * 4"
+      ]
+    },
+    {
+      "description": "Update mise on Tuesdays; every other repository defaults to Friday, and the rules for jdx-owned packages below still apply at any time",
+      "matchRepositories": [
+        "jdx/mise"
+      ],
+      "schedule": [
+        "* * * * 2"
+      ]
+    },
+    {
       "automerge": true,
       "description": "Automerge non-major updates",
       "matchUpdateTypes": [
@@ -349,7 +392,7 @@
   ],
   "prHourlyLimit": 10,
   "schedule": [
-    "* * * * 2"
+    "* * * * 5"
   ],
   "timezone": "America/Chicago",
   "rebaseWhen": "conflicted"
