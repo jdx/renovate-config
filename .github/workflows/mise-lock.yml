@@ -109,7 +109,7 @@ jobs:
       # is that the lockfile is stale, so mise-action's default
       # `mise install --locked` would fail before we get a chance to fix it.
       # This step only puts the mise CLI on PATH.
-      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
         with:
           install: false
           cache: false
