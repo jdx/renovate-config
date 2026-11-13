@@ -1,7 +1,20 @@
 # Changelog
 
 ---
-## [1.1.0](https://github.com/jdx/renovate-config/compare/v1.0.2..v1.1.0) - 2026-10-12
+## [1.2.0](https://github.com/jdx/renovate-config/compare/v1.1.0..v1.2.0) - 2026-11-13
+
+### 🚀 Features
+
+- spread renovate schedules across weekdays by repository by [@jdx](https://github.com/jdx) in [697f7a8](https://github.com/jdx/renovate-config/commit/697f7a81f45e79d295c91aed39c1246c3eaf7e87)
+
+### ⚙️ Miscellaneous Tasks
+
+- **(release)** shorten minimum release age to 2 days by [@jdx](https://github.com/jdx) in [a406d97](https://github.com/jdx/renovate-config/commit/a406d970bdb33f60b105cb78c02c815e7e2e4d9e)
+- stop restoring caches in release jobs (#44) by [@jdx](https://github.com/jdx) in [#44](https://github.com/jdx/renovate-config/pull/44)
+- use client-id for create-github-app-token (#46) by [@jdx](https://github.com/jdx) in [#46](https://github.com/jdx/renovate-config/pull/46)
+
+---
+## [1.1.0](https://github.com/jdx/renovate-config/compare/v1.0.2..v1.1.0) - 2026-10-13
 
 ### 🚀 Features
 
