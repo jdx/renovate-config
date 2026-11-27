@@ -139,6 +139,14 @@
       ]
     },
     {
+      "description": "mise tools set to 'latest' only change mise.lock, so every update reuses the same branch and PR title ('... to latest'). Renovate turns automerge off when a merged PR with that branch and title already exists, so skip that check for these updates",
+      "matchManagers": [
+        "mise"
+      ],
+      "matchCurrentValue": "latest",
+      "recreateWhen": "always"
+    },
+    {
       "description": "Group non-major npm updates",
       "groupName": "npm packages",
       "groupSlug": "npm-non-major",
