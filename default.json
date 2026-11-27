@@ -86,6 +86,13 @@
       ]
     },
     {
+      "description": "Pinning a digest keeps the version already in use, and pins often have no release timestamp, so the 7-day age check held them pending forever",
+      "matchUpdateTypes": [
+        "pinDigest"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
       "description": "Group non-major updates into one PR per ecosystem; the rules below split them by manager",
       "groupName": "non-major dependencies",
       "groupSlug": "non-major",
