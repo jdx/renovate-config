@@ -1,6 +1,13 @@
 # Changelog
 
 ---
+## [1.2.1](https://github.com/jdx/renovate-config/compare/v1.2.0..v1.2.1) - 2026-11-27
+
+### ⚙️ Miscellaneous Tasks
+
+- **(entire)** remove trail runners by [@jdx](https://github.com/jdx) in [5d3cb06](https://github.com/jdx/renovate-config/commit/5d3cb0692afe452cc4234fb220aff170979cd5c2)
+
+---
 ## [1.2.0](https://github.com/jdx/renovate-config/compare/v1.1.0..v1.2.0) - 2026-11-13
 
 ### 🚀 Features
