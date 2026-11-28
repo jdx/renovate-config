@@ -1,7 +1,22 @@
 # Changelog
 
 ---
+## [1.2.2](https://github.com/jdx/renovate-config/compare/v1.2.1..v1.2.2) - 2026-11-28
+
+### ⚙️ Miscellaneous Tasks
+
+- add GitHub Actions workflow lockfile by [@claude](https://github.com/claude) in [67a7c76](https://github.com/jdx/renovate-config/commit/67a7c76a532fcc2e6a071f4a6e9348e8c628bb70)
+
+### New Contributors
+
+* @claude made their first contribution
+
+---
 ## [1.2.1](https://github.com/jdx/renovate-config/compare/v1.2.0..v1.2.1) - 2026-11-27
+
+### 🐛 Bug Fixes
+
+- keep automerge working for mise "latest" tools and digest pins (#69) by [@jdx](https://github.com/jdx) in [#69](https://github.com/jdx/renovate-config/pull/69)
 
 ### ⚙️ Miscellaneous Tasks
 
